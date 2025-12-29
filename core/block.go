@@ -46,3 +46,16 @@ func (b *Block) CalculateHash() []byte {
 	hash := sha256.Sum256(headers)
 	return hash[:]
 }
+
+type Blockchain struct {
+	Blocks []*Block
+}
+
+func NewBlockchain() *Blockchain {
+	genesisBlock := NewBlock("Genesis Block", []byte{})
+	return &Blockchain{
+		Blocks: []*Block{
+			genesisBlock,
+		},
+	}
+}
