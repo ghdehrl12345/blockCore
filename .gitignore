@@ -1,0 +1,16 @@
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+blockcore
+
+# Database
+*.db
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
