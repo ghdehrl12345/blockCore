@@ -47,15 +47,19 @@ func (b *Block) CalculateHash() []byte {
 	return hash[:]
 }
 
+// 연결 리스트 구조체
 type Blockchain struct {
 	Blocks []*Block
 }
 
+// 제네시스 블록 포함한 새 블록체인 생성
 func NewBlockchain() *Blockchain {
 	genesisBlock := NewBlock("Genesis Block", []byte{})
-	return &Blockchain{
-		Blocks: []*Block{
-			genesisBlock,
-		},
-	}
+	return &Blockchain{Blocks: []*Block{genesisBlock}}
+}
+
+func (bc *Blockchain) AddBlock(data string) {
+	prevBlock := bc.Blocks[len(bc.Blocks)-1]
+	newBlock := NewBlock(data, prevBlock.Hash)
+	bc.Blocks = append(bc.Blocks, newBlock)
 }
