@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/binary"
+	"encoding/gob"
+	"log"
 	"time"
 )
 
@@ -53,19 +55,28 @@ func (b *Block) CalculateHash() []byte {
 	return hash[:]
 }
 
-// 연결 리스트 구조체
-type Blockchain struct {
-	Blocks []*Block
+// DB에 블록을 저장하려면 Block 구조체를 바이트 배열로 변환해야함
+// 블록을 바이트 배열로 변환
+func (b *Block) Serialize() []byte {
+	var result bytes.Buffer
+
+	encoder := gob.NewEncoder(&result)
+	err := encoder.Encode(b)
+	if err != nil {
+		log.Panic(err)
+	}
+	return result.Bytes()
 }
 
-// 제네시스 블록 포함한 새 블록체인 생성
-func NewBlockchain() *Blockchain {
-	genesisBlock := NewBlock("Genesis Block", []byte{})
-	return &Blockchain{Blocks: []*Block{genesisBlock}}
-}
+// 바이트 배열을 블록으로 복원
+func DeserializeBlock(data []byte) *Block {
+	var block Block
 
-func (bc *Blockchain) AddBlock(data string) {
-	prevBlock := bc.Blocks[len(bc.Blocks)-1]
-	newBlock := NewBlock(data, prevBlock.Hash)
-	bc.Blocks = append(bc.Blocks, newBlock)
+	decoder := gob.NewDecoder(bytes.NewReader(data))
+	err := decoder.Decode(&block)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	return &block
 }
