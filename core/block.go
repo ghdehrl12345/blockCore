@@ -3,7 +3,6 @@ package core
 import (
 	"bytes"
 	"crypto/sha256"
-	"encoding/binary"
 	"encoding/gob"
 	"log"
 	"time"
@@ -12,22 +11,21 @@ import (
 // Block 구조체
 type Block struct {
 	Timestamp     int64
-	Data          []byte // 나중에 TX로 대체할거임
+	Transactions  []*Transaction // 나중에 TX로 대체할거임
 	PrevBlockHash []byte
 	Hash          []byte
 	Nonce         int
 }
 
 // NewBlock 함수(블록 생성, 해시 계산)
-func NewBlock(data string, prevBlockHash []byte) *Block {
+func NewBlock(transactions []*Transaction, prevBlockHash []byte) *Block {
 	block := &Block{
 		Timestamp:     time.Now().Unix(),
-		Data:          []byte(data),
+		Transactions:  transactions,
 		PrevBlockHash: prevBlockHash,
 		Hash:          nil,
 		Nonce:         0,
 	}
-
 	pow := NewProofOfWork(block)
 	nonce, hash := pow.Run()
 
@@ -37,21 +35,16 @@ func NewBlock(data string, prevBlockHash []byte) *Block {
 	return block
 }
 
-// 블록 해시 계산 함수
-func (b *Block) CalculateHash() []byte {
-	timestamp := make([]byte, 8)
-	binary.BigEndian.PutUint64(timestamp, uint64(b.Timestamp)) //
+// 블록 내 모든 TX의 해시 계산
+func (b *Block) HashTransactions() []byte {
+	var txHashes [][]byte
 
-	headers := bytes.Join(
-		[][]byte{
-			b.PrevBlockHash,
-			b.Data,
-			timestamp,
-		},
-		[]byte{},
-	)
+	for _, tx := range b.Transactions {
+		txHashes = append(txHashes, tx.ID)
+	}
 
-	hash := sha256.Sum256(headers)
+	combined := bytes.Join(txHashes, []byte{})
+	hash := sha256.Sum256(combined)
 	return hash[:]
 }
 

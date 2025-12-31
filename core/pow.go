@@ -38,7 +38,7 @@ func (pow *ProofOfWork) prepareData(nonce int) []byte {
 	data := bytes.Join(
 		[][]byte{
 			pow.block.PrevBlockHash,
-			pow.block.Data,
+			pow.block.HashTransactions(),
 			timestamp,
 			targetBits,
 			nonceBytes,
